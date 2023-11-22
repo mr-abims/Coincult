@@ -1,0 +1,20 @@
+[package]
+name = "api-actix"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+# internal
+api-lib = { workspace = true }
+# db
+sqlx = { workspace = true }
+# actix
+actix-web = { workspace = true }
+actix-files = { workspace = true }
+actix-cors = "0.6.4"
+# utils
+dotenv = "0.15"
+# tracing
+tracing =  { workspace = true }
+tracing-subscriber = { version= "0.3", features = ["env-filter", "json", "time"] }

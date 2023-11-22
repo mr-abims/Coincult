@@ -1,0 +1,103 @@
+# project tasks
+[tasks.api-run]
+workspace = false
+env = { RUST_LOG="info" }
+install_crate = "cargo-shuttle"
+command = "cargo"
+args = ["shuttle", "run"]
+
+[tasks.api-run-actix]
+workspace = false
+command = "cargo"
+args = ["run", "--bin", "api-actix"]
+
+[tasks.front-serve]
+workspace = false
+cwd = "./front"
+install_crate = "dioxus-cli"
+command = "dioxus"
+args = ["serve", "--port", "8000"]
+
+[tasks.front-build]
+workspace = false
+script_runner = "@shell"
+script = '''
+# shuttle issue with static files
+# location is different depending on the environment
+rm -rf api/shuttle/static static
+mkdir api/shuttle/static
+mkdir static
+cd front
+dioxus build --release
+# local development 
+cp -r dist/* ../api/shuttle/static
+# production
+cp -r dist/* ../static
+'''
+
+# local db
+[tasks.db-start]
+workspace = false
+script_runner = "@shell"
+script = '''
+docker run -d --name devbcn-workshop -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres -e POSTGRES_DB=devbcn postgres
+'''
+
+[tasks.db-stop]
+workspace = false
+script_runner = "@shell"
+script = '''
+docker stop postgres
+docker rm postgres
+'''
+
+# general tasks
+[tasks.clippy]
+workspace = false
+install_crate = "cargo-clippy"
+command = "cargo"
+args = ["clippy"]
+
+[tasks.format]
+clear = true
+workspace = false
+install_crate = "rustfmt"
+command = "cargo"
+args = ["fmt", "--all", "--", "--check"]
+
+# book tasks
+[tasks.book-preprocessors]
+workspace = false
+script_runner = "@shell"
+script = '''
+cargo install mdbook-mermaid
+cargo install mdbook-admonish
+cargo install mdbook-toc
+'''
+
+[tasks.book-build-ci]
+workspace = false
+run_task = { name = ["book-build-inner"] }
+
+[tasks.book-build]
+workspace = false
+run_task = { name = ["book-preprocessors", "book-build-inner"] }
+
+[tasks.book-serve]
+workspace = false
+run_task = { name = ["book-preprocessors", "book-serve-inner"] }
+
+[tasks.book-build-inner]
+workspace = false
+cwd = "./docs"
+install_crate = "mdbook"
+command = "mdbook"
+args = ["build"]
+
+[tasks.book-serve-inner]
+workspace = false
+cwd = "./docs"
+install_crate = "mdbook"
+command = "mdbook"
+args = ["serve"]
+
